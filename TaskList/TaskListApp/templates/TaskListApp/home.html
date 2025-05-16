@@ -24,7 +24,7 @@
 
   <!-- Botones debajo -->
   <div id="leftButtons" class="task-buttons fade-buttons">
-    <div class="d-flex flex-wrap gap-2">
+    <div id="extraButtons" class="d-flex flex-wrap gap-2">
       <button type="button" class="task-button" disabled><i data-feather="maximize-2"></i> Open</button>
       <button type="button" class="task-button" disabled><i data-feather="calendar"></i> Today</button>
       <button type="button" class="task-button" disabled><i data-feather="lock"></i> Public</button>
@@ -33,7 +33,7 @@
     </div>
     <div class="btn-group-right">
       <button type="button" class="task-button btn-cancel" id="cancelBtn" disabled>Cancel</button>
-      <button type="submit" class="task-button btn-ok" id="okBtn" disabled>Ok</button>
+      <button type="submit" class="task-button btn-ok" id="okBtn">Ok</button>
     </div>
   </div>
 </form>
@@ -65,7 +65,8 @@
   const cancelBtn = document.getElementById('cancelBtn');
   const form = document.getElementById('taskForm');
   const leftButtonsContainer = document.getElementById('leftButtons');
-  const leftButtons = leftButtonsContainer.querySelectorAll('button');
+  const leftButtons = document.querySelectorAll('#extraButtons button');
+  //const leftButtons = leftButtonsContainer.querySelectorAll('button');
   const plusToggle = document.getElementById('plusToggle');
 
   // Mostrar botones al hacer foco en el input
@@ -77,9 +78,13 @@
   input.addEventListener('input', () => {
     const isEmpty = input.value.trim() === "";
 
-    okBtn.disabled = isEmpty;
+    // Cambiar texto del botón OK
+    okBtn.textContent = isEmpty ? "Ok" : "Add";
+
+    // Cancel solo se habilita si hay texto
     cancelBtn.disabled = isEmpty;
 
+    // Otros botones se habilitan solo con texto
     leftButtons.forEach(btn => {
       btn.disabled = isEmpty;
     });
@@ -97,7 +102,7 @@
   // Cancelar limpia el input y desactiva todo
   cancelBtn.addEventListener('click', () => {
     input.value = "";
-    okBtn.disabled = true;
+    okBtn.textContent = "Ok";
     cancelBtn.disabled = true;
     leftButtons.forEach(btn => btn.disabled = true);
     leftButtonsContainer.classList.remove('show');
