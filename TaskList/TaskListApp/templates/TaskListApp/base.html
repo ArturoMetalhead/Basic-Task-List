@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>
+    {% block title %}{% endblock %}
+    </title>
+
+    {% load static %}
+
+    <link rel="stylesheet"
+          type="text/css"
+          href="{% static 'TaskListApp/css/bootstrap.min.css' %}" />
+    <!-- <link rel="stylesheet"
+          type="text/css"
+          href="static/TaskListApp/css/owl.css" /> -->
+    <style>
+      .navbar-brand {
+        font-size: 24px;
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+      }
+      body{
+        background:#141414;
+      }
+    </style>
+  </head>
+  <body>
+    
+    <!--Scripts-->
+    <script src="{% static 'TaskListApp/js/jquery.min.js' %} "></script> 
+    <script src="{% static 'TaskListApp/js/bootstrap.min.js' %} "></script>
+    <!-- <script src="static/TaskListApp/js/owl-carousel.js"></script> -->
+    <!--para heredar-->
+    {% block content %}
+    {% endblock content %}
+  </body>
+</html>
