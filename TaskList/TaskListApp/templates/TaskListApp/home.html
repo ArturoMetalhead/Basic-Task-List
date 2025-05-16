@@ -19,7 +19,37 @@
     </div>
 </div>
 
-
+<script>
+    const input = document.getElementById('taskInput');
+    const okBtn = document.getElementById('okBtn');
+    const cancelBtn = document.getElementById('cancelBtn');
+  
+    input.addEventListener('input', () => {
+      if (input.value.trim() === "") {
+        okBtn.disabled = true;
+        cancelBtn.disabled = false;
+      } else {
+        okBtn.disabled = false;
+        cancelBtn.disabled = false;
+      }
+    });
+  
+    cancelBtn.addEventListener('click', () => {
+      input.value = "";
+      okBtn.disabled = true;
+      cancelBtn.disabled = true;
+    });
+  
+    okBtn.addEventListener('click', () => {
+      if (input.value.trim() !== "") {
+        // TODO Post task to server
+        console.log("Add task:", input.value);
+        input.value = "";
+        okBtn.disabled = true;
+        cancelBtn.disabled = true;
+      }
+    });
+</script>
 
 
   
