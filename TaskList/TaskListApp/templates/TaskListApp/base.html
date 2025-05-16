@@ -15,6 +15,19 @@
       body{
         background:#141414;
       }
+
+      .fade-buttons {
+        opacity: 0;
+        height: 0;
+        overflow: hidden;
+        transition: all 0.3s ease;
+      }
+
+      .fade-buttons.show {
+        opacity: 1;
+        height: auto;
+        margin-top: 0.5rem; /* reemplaza mt-2 */
+      }
     </style>
   </head>
   <body>
