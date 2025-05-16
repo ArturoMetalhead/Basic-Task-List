@@ -11,38 +11,38 @@
 <form id="taskForm" method="post" action="{% url 'add_task' %}">
   {% csrf_token %}
 
-  <!-- Input + botones derechos -->
   <div class="d-flex align-items-center position-relative w-100">
-    <!-- Ícono del plus, como overlay -->
     <span id="plusToggle"
           class="position-absolute ps-3"
           style="cursor: pointer; z-index: 2; left: 0.5rem; top: 50%; transform: translateY(-50%);">
       <i data-feather="plus-square"></i>
     </span>
   
-    <!-- Input -->
     <input type="text" name="title" id="taskInput"
            class="form-control ps-5 me-2"
            placeholder="Add a task">
-  
-    <!-- Botones a la derecha -->
-    <button type="button" class="btn btn-outline-secondary me-1" id="cancelBtn" disabled>
-      <i data-feather="x"></i>
-    </button>
-    <button type="submit" class="btn btn-outline-primary me-1" id="okBtn" disabled>
-      <i data-feather="check"></i>
-    </button>
   </div>
 
-  <!-- Botones izquierdos -->
-  <div id="leftButtons" class="fade-buttons">
-    <button type="button" class="btn btn-outline-secondary me-2" disabled>Btn 1</button>
-    <button type="button" class="btn btn-outline-secondary me-2" disabled>Btn 2</button>
-    <button type="button" class="btn btn-outline-secondary me-2" disabled>Btn 3</button>
-    <button type="button" class="btn btn-outline-secondary me-2" disabled>Btn 4</button>
-    <button type="button" class="btn btn-outline-secondary me-2" disabled>Btn 5</button>
-  </div>
+  <!-- Botones izquierdos (extras) -->
+<div id="leftButtons" class="fade-buttons d-flex flex-wrap mt-2">
+  <button type="button" class="btn btn-outline-secondary me-2" disabled>Btn 1</button>
+  <button type="button" class="btn btn-outline-secondary me-2" disabled>Btn 2</button>
+  <button type="button" class="btn btn-outline-secondary me-2" disabled>Btn 3</button>
+  <button type="button" class="btn btn-outline-secondary me-2" disabled>Btn 4</button>
+  <button type="button" class="btn btn-outline-secondary me-2" disabled>Btn 5</button>
+
+  <!--Botones derechos (OK y Cancel) -->
+  <button type="button" class="btn btn-outline-secondary me-2" id="cancelBtn" disabled>
+    <i data-feather="x"></i>
+  </button>
+  <button type="submit" class="btn btn-outline-primary me-2" id="okBtn" disabled>
+    <i data-feather="check"></i>
+  </button>
+</div>
+
 </form>
+
+
 
 <ul class="list-group mt-3">
   {% for task in tasks %}
