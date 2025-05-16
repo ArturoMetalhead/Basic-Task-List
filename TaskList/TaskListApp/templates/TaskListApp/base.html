@@ -13,7 +13,69 @@
 
     <style>
       body{
-        background:#141414;
+        background:#fff;
+      }
+
+        .task-box {
+        background: #fff;
+        border: 1px solid #ddd;
+        border-radius: 8px;
+        padding: 0.75rem 1rem;
+        box-shadow: 0 1px 4px rgba(0, 0, 0, 0.05);
+      }
+
+      .task-input {
+        border: none;
+        box-shadow: none;
+        outline: none;
+      }
+
+      .task-input:focus {
+        border: none;
+        box-shadow: none;
+      }
+
+      .task-buttons {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-top: 0.75rem;
+        gap: 0.5rem;
+        flex-wrap: wrap;
+      }
+
+      .task-button {
+        border: 1px solid #e0e0e0;
+        background-color: #f9f9f9;
+        color: #555;
+        border-radius: 6px;
+        padding: 0.4rem 0.75rem;
+        font-size: 0.875rem;
+        display: flex;
+        align-items: center;
+        gap: 0.4rem;
+        cursor: default;
+      }
+
+      .task-button:disabled {
+        opacity: 0.5;
+      }
+
+      .btn-group-right {
+        display: flex;
+        gap: 0.5rem;
+      }
+
+      .btn-ok {
+        background-color: #0d6efd;
+        color: white;
+        border: none;
+      }
+
+      .btn-cancel {
+        background-color: #f1f1f1;
+        color: #444;
+        border: none;
       }
 
       .fade-buttons {
@@ -26,7 +88,24 @@
       .fade-buttons.show {
         opacity: 1;
         height: auto;
-        margin-top: 0.5rem; /* reemplaza mt-2 */
+      }
+
+      .plus-icon {
+        position: absolute;
+        left: 0.2rem;
+        top: 50%;
+        transform: translateY(-50%);
+        z-index: 2;
+        cursor: pointer;
+      }
+
+      .input-wrapper {
+        position: relative;
+        width: 100%;
+      }
+
+      .task-input.ps-5 {
+        padding-left: 2rem !important;
       }
     </style>
   </head>
