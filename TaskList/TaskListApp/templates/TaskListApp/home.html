@@ -1,5 +1,6 @@
 {% extends "TaskListApp/base.html" %}
 {% load static %}
+{% load custom_filters %}
 
 {% block title %}TaskList{% endblock %}
 
@@ -7,50 +8,122 @@
 {% block content %}
 
 
-<div class="card my-2 p-3">
-    <div class="d-flex align-items-center">
-      <input type="text" class="form-control me-2" id="taskInput" placeholder="Add a new task">
-      <button class="btn btn-outline-secondary me-1" id="cancelBtn" disabled>
-        <i data-feather="x"></i>
-      </button>
-      <button class="btn btn-outline-primary me-1" id="okBtn" disabled>
-        <i data-feather="check"></i>
-      </button>
-    </div>
-</div>
+<form id="taskForm" method="post" action="{% url 'add_task' %}">
+  {% csrf_token %}
+
+  <!-- Input + botones derechos -->
+  <div class="d-flex align-items-center position-relative w-100">
+    <!-- Ícono del plus, como overlay -->
+    <span id="plusToggle"
+          class="position-absolute ps-3"
+          style="cursor: pointer; z-index: 2; left: 0.5rem; top: 50%; transform: translateY(-50%);">
+      <i data-feather="plus-square"></i>
+    </span>
+  
+    <!-- Input -->
+    <input type="text" name="title" id="taskInput"
+           class="form-control ps-5 me-2"
+           placeholder="Add a task">
+  
+    <!-- Botones a la derecha -->
+    <button type="button" class="btn btn-outline-secondary me-1" id="cancelBtn" disabled>
+      <i data-feather="x"></i>
+    </button>
+    <button type="submit" class="btn btn-outline-primary me-1" id="okBtn" disabled>
+      <i data-feather="check"></i>
+    </button>
+  </div>
+
+  <!-- Botones izquierdos -->
+  <div id="leftButtons" class="fade-buttons">
+    <button type="button" class="btn btn-outline-secondary me-2" disabled>Btn 1</button>
+    <button type="button" class="btn btn-outline-secondary me-2" disabled>Btn 2</button>
+    <button type="button" class="btn btn-outline-secondary me-2" disabled>Btn 3</button>
+    <button type="button" class="btn btn-outline-secondary me-2" disabled>Btn 4</button>
+    <button type="button" class="btn btn-outline-secondary me-2" disabled>Btn 5</button>
+  </div>
+</form>
+
+<ul class="list-group mt-3">
+  {% for task in tasks %}
+    <li class="list-group-item d-flex justify-content-between align-items-center">
+      
+      <div class="d-flex align-items-center w-100">
+        <form method="post" action="{% url 'delete_task' task.id %}" onsubmit="return confirm('Delete this task?');" class="me-3">
+          {% csrf_token %}
+          <input type="checkbox" onchange="this.form.submit()" />
+        </form>
+        <span>{{ task.title|highlight_tags }}</span>
+      </div>
+
+    </li>
+  {% empty %}
+    <li class="list-group-item">No tasks yet.</li>
+  {% endfor %}
+</ul>
+
+
+<!-------------------SCRIPTS------------------>
 
 <script>
-    const input = document.getElementById('taskInput');
-    const okBtn = document.getElementById('okBtn');
-    const cancelBtn = document.getElementById('cancelBtn');
-  
-    input.addEventListener('input', () => {
+  const input = document.getElementById('taskInput');
+  const okBtn = document.getElementById('okBtn');
+  const cancelBtn = document.getElementById('cancelBtn');
+  const form = document.getElementById('taskForm');
+  const leftButtonsContainer = document.getElementById('leftButtons');
+  const leftButtons = leftButtonsContainer.querySelectorAll('button');
+  const plusToggle = document.getElementById('plusToggle');
+
+  // Mostrar botones al hacer foco en el input
+  input.addEventListener('focus', () => {
+    leftButtonsContainer.classList.add('show');
+  });
+
+  // Habilitar/deshabilitar botones según el texto
+  input.addEventListener('input', () => {
+    const isEmpty = input.value.trim() === "";
+
+    okBtn.disabled = isEmpty;
+    cancelBtn.disabled = isEmpty;
+
+    leftButtons.forEach(btn => {
+      btn.disabled = isEmpty;
+    });
+  });
+
+  // Ocultar los botones si pierde foco y no hay texto
+  input.addEventListener('blur', () => {
+    setTimeout(() => {
       if (input.value.trim() === "") {
-        okBtn.disabled = true;
-        cancelBtn.disabled = false;
-      } else {
-        okBtn.disabled = false;
-        cancelBtn.disabled = false;
+        leftButtonsContainer.classList.remove('show');
       }
-    });
-  
-    cancelBtn.addEventListener('click', () => {
-      input.value = "";
-      okBtn.disabled = true;
-      cancelBtn.disabled = true;
-    });
-  
-    okBtn.addEventListener('click', () => {
-      if (input.value.trim() !== "") {
-        // TODO Post task to server
-        console.log("Add task:", input.value);
-        input.value = "";
-        okBtn.disabled = true;
-        cancelBtn.disabled = true;
-      }
-    });
+    }, 100);
+  });
+
+  // Cancelar limpia el input y desactiva todo
+  cancelBtn.addEventListener('click', () => {
+    input.value = "";
+    okBtn.disabled = true;
+    cancelBtn.disabled = true;
+    leftButtons.forEach(btn => btn.disabled = true);
+    leftButtonsContainer.classList.remove('show');
+  });
+
+  // Evita submit si está vacío
+  form.addEventListener('submit', (e) => {
+    if (input.value.trim() === "") {
+      e.preventDefault();
+    }
+  });
+   
+  // Mostrar botones al hacer clic en el botón de más
+  plusToggle.addEventListener('click', () => {
+  if (!leftButtonsContainer.classList.contains('show')) {
+    leftButtonsContainer.classList.add('show');
+    input.focus();
+  }
+});
+
 </script>
-
-
   
 {% endblock %}
