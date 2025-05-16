@@ -7,9 +7,20 @@
 {% block content %}
 
 
+<div class="card my-2 p-3">
+    <div class="d-flex align-items-center">
+      <input type="text" class="form-control me-2" id="taskInput" placeholder="Add a new task">
+      <button class="btn btn-outline-secondary me-1" id="cancelBtn" disabled>
+        <i data-feather="x"></i>
+      </button>
+      <button class="btn btn-outline-primary me-1" id="okBtn" disabled>
+        <i data-feather="check"></i>
+      </button>
+    </div>
+</div>
 
-<h1>Home Task List</h1>
 
 
 
+  
 {% endblock %}
