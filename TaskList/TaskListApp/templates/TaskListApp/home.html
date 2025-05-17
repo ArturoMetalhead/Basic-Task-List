@@ -78,77 +78,40 @@
   const leftButtonsContainer = document.getElementById('leftButtons');
   const leftButtons = document.querySelectorAll('#extraButtons button');
   const plusToggle = document.getElementById('plusToggle');
+  const mobileActionBtn = document.getElementById('mobileActionBtn');
+  
   let activeInlineEditor = null;
   
-
-
-  const mobileActionBtn = document.getElementById('mobileActionBtn');
-  let isTaskFilled = false;
-
   function updateButtons() {
     const isEmpty = input.value.trim() === "";
     const isMobile = window.innerWidth < 1230;
-
+  
     if (isMobile) {
-      // Mostrar solo el botón móvil
       mobileActionBtn.classList.remove('d-none');
       cancelBtn.classList.add('d-none');
       okBtn.classList.add('d-none');
-
-      // Cambiar icono según si hay texto
       mobileActionBtn.innerHTML = `<i data-feather="${isEmpty ? 'x' : 'plus'}"></i>`;
       feather.replace();
     } else {
-      // Mostrar botones normales
       mobileActionBtn.classList.add('d-none');
       cancelBtn.classList.remove('d-none');
       okBtn.classList.remove('d-none');
-
-      // Actualizar estado
       okBtn.textContent = isEmpty ? "Ok" : "Add";
       cancelBtn.disabled = false;
     }
-
-    // Activar/desactivar botones extra
-    leftButtons.forEach(btn => {
-      btn.disabled = isEmpty;
-    });
+  
+    leftButtons.forEach(btn => btn.disabled = isEmpty);
   }
-
-// Input listener
-input.addEventListener('input', updateButtons);
-window.addEventListener('resize', updateButtons); // actualizar al redimensionar
-
-// Acción botón móvil
-mobileActionBtn.addEventListener('click', () => {
-  const isEmpty = input.value.trim() === "";
-  if (isEmpty) {
-    // Acción de cancel
-    input.value = "";
-    leftButtonsContainer.classList.remove('show');
-    updateButtons();
-  } else {
-    // Acción de enviar
-    form.submit();
-  }
-});
-
-  // Mostrar botones al hacer foco en el input
-  input.addEventListener('focus', () => {
-    leftButtonsContainer.classList.add('show');
-  });
-
-
-  // Ocultar los botones si pierde foco y no hay texto
-  input.addEventListener('blur', () => {
-    setTimeout(() => {
-      if (input.value.trim() === "") {
-        leftButtonsContainer.classList.remove('show');
-      }
-    }, 100);
-  });
-
-  // Cancelar limpia el input y desactiva todo
+  
+  input.addEventListener('input', updateButtons);
+  window.addEventListener('resize', updateButtons);
+  input.addEventListener('focus', () => leftButtonsContainer.classList.add('show'));
+  input.addEventListener('blur', () => setTimeout(() => {
+    if (input.value.trim() === "") {
+      leftButtonsContainer.classList.remove('show');
+    }
+  }, 100));
+  
   cancelBtn.addEventListener('click', () => {
     input.value = "";
     okBtn.textContent = "Ok";
@@ -156,149 +119,145 @@ mobileActionBtn.addEventListener('click', () => {
     leftButtons.forEach(btn => btn.disabled = true);
     leftButtonsContainer.classList.remove('show');
   });
-
-  // Evita submit si está vacío
+  
   form.addEventListener('submit', (e) => {
-    if (input.value.trim() === "") {
-      e.preventDefault();
+    if (input.value.trim() === "") e.preventDefault();
+  });
+  
+  plusToggle.addEventListener('click', () => {
+    if (!leftButtonsContainer.classList.contains('show')) {
+      leftButtonsContainer.classList.add('show');
+      input.focus();
     }
   });
-   
-  // Mostrar botones al hacer clic en el botón de más
-  plusToggle.addEventListener('click', () => {
-  if (!leftButtonsContainer.classList.contains('show')) {
-    leftButtonsContainer.classList.add('show');
-    input.focus();
-  }
-});
+  
+  mobileActionBtn.addEventListener('click', () => {
+    const isEmpty = input.value.trim() === "";
+    if (isEmpty) {
+      input.value = "";
+      leftButtonsContainer.classList.remove('show');
+      updateButtons();
+    } else {
+      form.submit();
+    }
+  });
 
-
-document.querySelectorAll('.editable-task').forEach(span => {
+  function attachEditListener(span) {
   span.addEventListener('click', () => {
-    // Elimina cualquier editor abierto
     if (activeInlineEditor) {
-      activeInlineEditor.remove();
+      activeInlineEditor.replaceWith(activeInlineEditor.originalSpan);
       activeInlineEditor = null;
     }
 
     const taskText = span.textContent.trim();
     const taskId = span.getAttribute('data-id');
 
-    // Crear nuevo contenedor
     const editor = document.createElement('div');
     editor.classList.add('task-box', 'inline-editor', 'mt-2');
 
+    const csrfToken = document.getElementById('csrf-token').innerHTML;
 
     editor.innerHTML = `
-  <form method="post" action="{% url 'add_task' %}" class="inline-edit-form">
-    {% csrf_token %}
-    <input type="hidden" name="task_id" value="${taskId}">
-    <div class="input-wrapper">
-      <input type="text" name="title" class="form-control task-input ps-5" value="${taskText}" autofocus>
-    </div>
+      <form method="post" action="{% url 'add_task' %}" class="inline-edit-form">
+        ${csrfToken}
+        <input type="hidden" name="task_id" value="${taskId}">
+        <div class="input-wrapper">
+          <input type="text" name="title" class="form-control task-input ps-5" value="${taskText}" autofocus>
+        </div>
+        <div class="task-buttons d-flex justify-content-between align-items-center flex-nowrap gap-2 mt-2">
+          <div class="d-flex gap-2 overflow-auto extraButtons">
+            <button type="button" class="task-button" disabled><i data-feather="maximize-2"></i> Open</button>
+            <button type="button" class="task-button" disabled><i data-feather="calendar"></i> Today</button>
+            <button type="button" class="task-button" disabled><i data-feather="lock"></i> Public</button>
+            <button type="button" class="task-button" disabled><i data-feather="sun"></i> Highlight</button>
+            <button type="button" class="task-button" disabled><i data-feather="circle"></i> Estimation</button>
+          </div>
+          <div class="btn-group-right d-flex gap-2">
+            <button type="button" class="task-button btn-cancel-inline">Cancel</button>
+            <button type="submit" class="task-button btn-ok-inline">Ok</button>
+            <button type="button" class="task-button d-none btn-mobile-inline"><i data-feather="save"></i></button>
+          </div>
+        </div>
+      </form>
+    `;
 
-    <div class="task-buttons d-flex justify-content-between align-items-center flex-nowrap gap-2 mt-2">
-      <div class="d-flex gap-2 overflow-auto extraButtons">
-        <!-- Botones extra -->
-        <button type="button" class="task-button" disabled><i data-feather="maximize-2"></i> Open</button>
-        <button type="button" class="task-button" disabled><i data-feather="calendar"></i> Today</button>
-        <button type="button" class="task-button" disabled><i data-feather="lock"></i> Public</button>
-        <button type="button" class="task-button" disabled><i data-feather="sun"></i> Highlight</button>
-        <button type="button" class="task-button" disabled><i data-feather="circle"></i> Estimation</button>
-      </div>
-
-      <div class="btn-group-right d-flex gap-2">
-        <button type="button" class="task-button btn-cancel-inline">Cancel</button>
-        <button type="submit" class="task-button btn-ok-inline">Ok</button>
-        <button type="button" class="task-button d-none btn-mobile-inline">
-          <i data-feather="save"></i>
-        </button>
-      </div>
-    </div>
-  </form>
-`;
-
-    span.parentElement.insertAdjacentElement('afterend', editor);
     feather.replace();
 
-    // Elementos internos
-const editForm = editor.querySelector('.inline-edit-form');
-const titleInput = editForm.querySelector('input[name="title"]');
-const cancelBtnInline = editForm.querySelector('.btn-cancel-inline');
-const okBtnInline = editForm.querySelector('.btn-ok-inline');
-const mobileBtnInline = editForm.querySelector('.btn-mobile-inline');
-//const extraButtonsInline = editForm.querySelectorAll('.task-button[disabled]');
+    span.replaceWith(editor);
+    editor.originalSpan = span;
+    activeInlineEditor = editor;
 
+    setTimeout(() => {
+      feather.replace();
+    }, 0);
 
-const extraButtonsInline = editForm.querySelectorAll('.extra-btn');
+    const input = editor.querySelector('input[name="title"]');
+    const cancelBtn = editor.querySelector('.btn-cancel-inline');
+    const okBtn = editor.querySelector('.btn-ok-inline');
+    const mobileBtn = editor.querySelector('.btn-mobile-inline');
+    const extras = editor.querySelectorAll('.extraButtons button');
 
+    function updateInlineButtons() {
+      const isEmpty = input.value.trim() === "";
+      const isMobile = window.innerWidth < 1230;
 
-// Función para actualizar visibilidad según tamaño y contenido
-function updateInlineButtons() {
-  const isEmpty = titleInput.value.trim() === "";
-  const isMobile = window.innerWidth < 1230;
+      if (isMobile) {
+        cancelBtn.classList.add('d-none');
+        okBtn.classList.add('d-none');
+        mobileBtn.classList.remove('d-none');
+        mobileBtn.innerHTML = `<i data-feather="${isEmpty ? 'x' : 'save'}"></i>`;
+        feather.replace();
+      } else {
+        cancelBtn.classList.remove('d-none');
+        okBtn.classList.remove('d-none');
+        mobileBtn.classList.add('d-none');
+      }
 
-  if (isMobile) {
-    cancelBtnInline.classList.add('d-none');
-    okBtnInline.classList.add('d-none');
-    mobileBtnInline.classList.remove('d-none');
+      extras.forEach(btn => btn.disabled = isEmpty);
+    }
 
-    mobileBtnInline.innerHTML = `<i data-feather="${isEmpty ? 'x' : 'save'}"></i>`;
-    feather.replace();
-  } else {
-    cancelBtnInline.classList.remove('d-none');
-    okBtnInline.classList.remove('d-none');
-    mobileBtnInline.classList.add('d-none');
-  }
+    input.addEventListener('input', updateInlineButtons);
+    window.addEventListener('resize', updateInlineButtons);
+    updateInlineButtons();
 
-  extraButtonsInline.forEach(btn => {
-  btn.disabled = isEmpty;
+    cancelBtn.addEventListener('click', () => {
+      editor.replaceWith(span);
+      attachEditListener(span);
+      activeInlineEditor = null;
+    });
+
+    mobileBtn.addEventListener('click', () => {
+      const isEmpty = input.value.trim() === "";
+      if (isEmpty) {
+        editor.replaceWith(span);
+        attachEditListener(span);
+        activeInlineEditor = null;
+      } else {
+        editor.querySelector('form').submit();
+      }
+    });
   });
 }
 
-titleInput.addEventListener('input', updateInlineButtons);
-window.addEventListener('resize', updateInlineButtons);
-updateInlineButtons();
-
-// Cancelar
-cancelBtnInline.addEventListener('click', () => {
-  editor.remove();
-  activeInlineEditor = null;
-});
-
-// Botón móvil
-mobileBtnInline.addEventListener('click', () => {
-  const isEmpty = titleInput.value.trim() === "";
-  if (isEmpty) {
-    editor.remove();
-    activeInlineEditor = null;
-  } else {
-    editForm.submit();
-  }
-});
+document.querySelectorAll('.editable-task').forEach(attachEditListener);
 
 
-    activeInlineEditor = editor;
-
-    // Botón cancelar
-    editor.querySelector('.btn-cancel-inline').addEventListener('click', () => {
-      editor.remove();
-      activeInlineEditor = null;
-    });
-  });
-});
-
-document.addEventListener('click', function (e) {
+document.addEventListener('click', (e) => {
   if (
     activeInlineEditor &&
     !activeInlineEditor.contains(e.target) &&
     !e.target.classList.contains('editable-task')
   ) {
-    activeInlineEditor.remove();
+    const originalSpan = activeInlineEditor.originalSpan;
+    activeInlineEditor.replaceWith(originalSpan);
+    attachEditListener(originalSpan);
     activeInlineEditor = null;
   }
 });
 
 </script>
   
+
+<span id="csrf-token" style="display: none;">{% csrf_token %}</span>
+
 {% endblock %}
