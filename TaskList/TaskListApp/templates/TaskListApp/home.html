@@ -174,7 +174,7 @@
           </div>
           <div class="btn-group-right d-flex gap-2">
             <button type="button" class="task-button btn-cancel-inline">Cancel</button>
-            <button type="submit" class="task-button btn-ok-inline">Ok</button>
+            <button type="submit" class="task-button btn-ok-inline">Save</button>
             <button type="button" class="task-button d-none btn-mobile-inline"><i data-feather="save"></i></button>
           </div>
         </div>
@@ -187,11 +187,17 @@
     editor.originalSpan = span;
     activeInlineEditor = editor;
 
+    const input = editor.querySelector('input[name="title"]');
     setTimeout(() => {
-      feather.replace();
+      input.focus();
+      input.setSelectionRange(input.value.length, input.value.length);
     }, 0);
 
-    const input = editor.querySelector('input[name="title"]');
+    setTimeout(() => {
+    feather.replace();
+  }, 0);
+
+    //const input = editor.querySelector('input[name="title"]');
     const cancelBtn = editor.querySelector('.btn-cancel-inline');
     const okBtn = editor.querySelector('.btn-ok-inline');
     const mobileBtn = editor.querySelector('.btn-mobile-inline');
