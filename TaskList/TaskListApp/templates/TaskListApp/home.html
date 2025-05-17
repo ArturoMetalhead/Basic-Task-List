@@ -190,27 +190,94 @@ document.querySelectorAll('.editable-task').forEach(span => {
 
 
     editor.innerHTML = `
-  <form method="post" action="{% url 'add_task' %}">
+  <form method="post" action="{% url 'add_task' %}" class="inline-edit-form">
     {% csrf_token %}
     <input type="hidden" name="task_id" value="${taskId}">
-    <input type="text" name="title" class="form-control mb-2" value="${taskText}" autofocus>
-    <div class="d-flex gap-2 flex-wrap mt-2">
-      <!-- Botones extra (desactivados) -->
-      <button type="button" class="task-button" disabled><i data-feather="maximize-2"></i> Open</button>
-      <button type="button" class="task-button" disabled><i data-feather="calendar"></i> Today</button>
-      <button type="button" class="task-button" disabled><i data-feather="lock"></i> Public</button>
-      <button type="button" class="task-button" disabled><i data-feather="sun"></i> Highlight</button>
-      <button type="button" class="task-button" disabled><i data-feather="circle"></i> Estimation</button>
+    <div class="input-wrapper">
+      <input type="text" name="title" class="form-control task-input ps-5" value="${taskText}" autofocus>
     </div>
-    <div class="d-flex justify-content-end gap-2 mt-2">
-      <button type="button" class="btn btn-secondary btn-cancel-inline">Cancel</button>
-      <button type="submit" class="btn btn-primary">Save</button>
+
+    <div class="task-buttons d-flex justify-content-between align-items-center flex-nowrap gap-2 mt-2">
+      <div class="d-flex gap-2 overflow-auto extraButtons">
+        <!-- Botones extra -->
+        <button type="button" class="task-button" disabled><i data-feather="maximize-2"></i> Open</button>
+        <button type="button" class="task-button" disabled><i data-feather="calendar"></i> Today</button>
+        <button type="button" class="task-button" disabled><i data-feather="lock"></i> Public</button>
+        <button type="button" class="task-button" disabled><i data-feather="sun"></i> Highlight</button>
+        <button type="button" class="task-button" disabled><i data-feather="circle"></i> Estimation</button>
+      </div>
+
+      <div class="btn-group-right d-flex gap-2">
+        <button type="button" class="task-button btn-cancel-inline">Cancel</button>
+        <button type="submit" class="task-button btn-ok-inline">Ok</button>
+        <button type="button" class="task-button d-none btn-mobile-inline">
+          <i data-feather="save"></i>
+        </button>
+      </div>
     </div>
   </form>
 `;
 
     span.parentElement.insertAdjacentElement('afterend', editor);
     feather.replace();
+
+    // Elementos internos
+const editForm = editor.querySelector('.inline-edit-form');
+const titleInput = editForm.querySelector('input[name="title"]');
+const cancelBtnInline = editForm.querySelector('.btn-cancel-inline');
+const okBtnInline = editForm.querySelector('.btn-ok-inline');
+const mobileBtnInline = editForm.querySelector('.btn-mobile-inline');
+//const extraButtonsInline = editForm.querySelectorAll('.task-button[disabled]');
+
+
+const extraButtonsInline = editForm.querySelectorAll('.extra-btn');
+
+
+// Función para actualizar visibilidad según tamaño y contenido
+function updateInlineButtons() {
+  const isEmpty = titleInput.value.trim() === "";
+  const isMobile = window.innerWidth < 1230;
+
+  if (isMobile) {
+    cancelBtnInline.classList.add('d-none');
+    okBtnInline.classList.add('d-none');
+    mobileBtnInline.classList.remove('d-none');
+
+    mobileBtnInline.innerHTML = `<i data-feather="${isEmpty ? 'x' : 'save'}"></i>`;
+    feather.replace();
+  } else {
+    cancelBtnInline.classList.remove('d-none');
+    okBtnInline.classList.remove('d-none');
+    mobileBtnInline.classList.add('d-none');
+  }
+
+  extraButtonsInline.forEach(btn => {
+  btn.disabled = isEmpty;
+  });
+}
+
+titleInput.addEventListener('input', updateInlineButtons);
+window.addEventListener('resize', updateInlineButtons);
+updateInlineButtons();
+
+// Cancelar
+cancelBtnInline.addEventListener('click', () => {
+  editor.remove();
+  activeInlineEditor = null;
+});
+
+// Botón móvil
+mobileBtnInline.addEventListener('click', () => {
+  const isEmpty = titleInput.value.trim() === "";
+  if (isEmpty) {
+    editor.remove();
+    activeInlineEditor = null;
+  } else {
+    editForm.submit();
+  }
+});
+
+
     activeInlineEditor = editor;
 
     // Botón cancelar
