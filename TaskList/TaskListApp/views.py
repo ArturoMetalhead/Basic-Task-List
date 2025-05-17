@@ -8,17 +8,21 @@ def home(request):
 
 def add_task(request):
     if request.method == 'POST':
-        title = request.POST.get('title', '').strip()
         task_id = request.POST.get('task_id')
+        title = request.POST.get('title', '').strip()
 
-        if title:
-            if task_id:
-                # Editar tarea existente
-                task = get_object_or_404(Task, id=task_id)
+        if task_id:
+            task = get_object_or_404(Task, id=task_id)
+
+            if title == '':
+                # Si está vacío, eliminar
+                task.delete()
+            else:
+                # Si tiene contenido, actualizar
                 task.title = title
                 task.save()
-            else:
-                # Crear nueva tarea
+        else:
+            if title != '':
                 Task.objects.create(title=title)
 
     return redirect('home')
