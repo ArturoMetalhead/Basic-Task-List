@@ -38,6 +38,12 @@
         <div class="btn-group-right d-flex gap-2">
           <button type="button" class="task-button btn-cancel" id="cancelBtn" disabled>Cancel</button>
           <button type="submit" class="task-button btn-ok" id="okBtn">Ok</button>
+
+           <!-- botón unificado-->
+           <button type="button" id="mobileActionBtn" class="task-button d-none">
+            <i data-feather="x"></i>
+          </button>
+
         </div>
       </div>
     </form>
@@ -70,29 +76,66 @@
   const form = document.getElementById('taskForm');
   const leftButtonsContainer = document.getElementById('leftButtons');
   const leftButtons = document.querySelectorAll('#extraButtons button');
-  //const leftButtons = leftButtonsContainer.querySelectorAll('button');
   const plusToggle = document.getElementById('plusToggle');
+  
+
+
+  const mobileActionBtn = document.getElementById('mobileActionBtn');
+  let isTaskFilled = false;
+
+  function updateButtons() {
+    const isEmpty = input.value.trim() === "";
+    const isMobile = window.innerWidth < 1230;
+
+    if (isMobile) {
+      // Mostrar solo el botón móvil
+      mobileActionBtn.classList.remove('d-none');
+      cancelBtn.classList.add('d-none');
+      okBtn.classList.add('d-none');
+
+      // Cambiar icono según si hay texto
+      mobileActionBtn.innerHTML = `<i data-feather="${isEmpty ? 'x' : 'plus'}"></i>`;
+      feather.replace();
+    } else {
+      // Mostrar botones normales
+      mobileActionBtn.classList.add('d-none');
+      cancelBtn.classList.remove('d-none');
+      okBtn.classList.remove('d-none');
+
+      // Actualizar estado
+      okBtn.textContent = isEmpty ? "Ok" : "Add";
+      cancelBtn.disabled = isEmpty;
+    }
+
+    // Activar/desactivar botones extra
+    leftButtons.forEach(btn => {
+      btn.disabled = isEmpty;
+    });
+  }
+
+// Input listener
+input.addEventListener('input', updateButtons);
+window.addEventListener('resize', updateButtons); // actualizar al redimensionar
+
+// Acción botón móvil
+mobileActionBtn.addEventListener('click', () => {
+  const isEmpty = input.value.trim() === "";
+  if (isEmpty) {
+    // Acción de cancel
+    input.value = "";
+    leftButtonsContainer.classList.remove('show');
+    updateButtons();
+  } else {
+    // Acción de enviar
+    form.submit();
+  }
+});
 
   // Mostrar botones al hacer foco en el input
   input.addEventListener('focus', () => {
     leftButtonsContainer.classList.add('show');
   });
 
-  // Habilitar/deshabilitar botones según el texto
-  input.addEventListener('input', () => {
-    const isEmpty = input.value.trim() === "";
-
-    // Cambiar texto del botón OK
-    okBtn.textContent = isEmpty ? "Ok" : "Add";
-
-    // Cancel solo se habilita si hay texto
-    cancelBtn.disabled = isEmpty;
-
-    // Otros botones se habilitan solo con texto
-    leftButtons.forEach(btn => {
-      btn.disabled = isEmpty;
-    });
-  });
 
   // Ocultar los botones si pierde foco y no hay texto
   input.addEventListener('blur', () => {
