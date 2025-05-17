@@ -23,6 +23,7 @@
         <input type="text" name="title" id="taskInput"
                class="form-control task-input ps-5"
                placeholder="Type to add new task">
+        <input type="hidden" name="task_id" id="taskIdInput" value="">
       </div>
 
       <!-- Botones debajo -->
@@ -36,7 +37,7 @@
           <button type="button" class="task-button" disabled><i data-feather="circle"></i> Estimation</button>
         </div>
         <div class="btn-group-right d-flex gap-2">
-          <button type="button" class="task-button btn-cancel" id="cancelBtn" disabled>Cancel</button>
+          <button type="button" class="task-button btn-cancel" id="cancelBtn">Cancel</button>
           <button type="submit" class="task-button btn-ok" id="okBtn">Ok</button>
 
            <!-- botón unificado-->
@@ -56,7 +57,7 @@
             {% csrf_token %}
             <input type="checkbox" onchange="this.form.submit()" />
           </form>
-          <span>{{ task.title|highlight_tags }}</span>
+          <span class="editable-task" data-id="{{ task.id }}">{{ task.title|highlight_tags }}</span>
         </li>
       {% empty %}
         <li class="list-group-item text-center">No tasks yet.</li>
@@ -77,6 +78,7 @@
   const leftButtonsContainer = document.getElementById('leftButtons');
   const leftButtons = document.querySelectorAll('#extraButtons button');
   const plusToggle = document.getElementById('plusToggle');
+  let activeInlineEditor = null;
   
 
 
@@ -104,7 +106,7 @@
 
       // Actualizar estado
       okBtn.textContent = isEmpty ? "Ok" : "Add";
-      cancelBtn.disabled = isEmpty;
+      cancelBtn.disabled = false;
     }
 
     // Activar/desactivar botones extra
@@ -150,7 +152,7 @@ mobileActionBtn.addEventListener('click', () => {
   cancelBtn.addEventListener('click', () => {
     input.value = "";
     okBtn.textContent = "Ok";
-    cancelBtn.disabled = true;
+    cancelBtn.disabled = false;
     leftButtons.forEach(btn => btn.disabled = true);
     leftButtonsContainer.classList.remove('show');
   });
@@ -167,6 +169,66 @@ mobileActionBtn.addEventListener('click', () => {
   if (!leftButtonsContainer.classList.contains('show')) {
     leftButtonsContainer.classList.add('show');
     input.focus();
+  }
+});
+
+
+document.querySelectorAll('.editable-task').forEach(span => {
+  span.addEventListener('click', () => {
+    // Elimina cualquier editor abierto
+    if (activeInlineEditor) {
+      activeInlineEditor.remove();
+      activeInlineEditor = null;
+    }
+
+    const taskText = span.textContent.trim();
+    const taskId = span.getAttribute('data-id');
+
+    // Crear nuevo contenedor
+    const editor = document.createElement('div');
+    editor.classList.add('task-box', 'inline-editor', 'mt-2');
+
+
+    editor.innerHTML = `
+  <form method="post" action="{% url 'add_task' %}">
+    {% csrf_token %}
+    <input type="hidden" name="task_id" value="${taskId}">
+    <input type="text" name="title" class="form-control mb-2" value="${taskText}" autofocus>
+    <div class="d-flex gap-2 flex-wrap mt-2">
+      <!-- Botones extra (desactivados) -->
+      <button type="button" class="task-button" disabled><i data-feather="maximize-2"></i> Open</button>
+      <button type="button" class="task-button" disabled><i data-feather="calendar"></i> Today</button>
+      <button type="button" class="task-button" disabled><i data-feather="lock"></i> Public</button>
+      <button type="button" class="task-button" disabled><i data-feather="sun"></i> Highlight</button>
+      <button type="button" class="task-button" disabled><i data-feather="circle"></i> Estimation</button>
+    </div>
+    <div class="d-flex justify-content-end gap-2 mt-2">
+      <button type="button" class="btn btn-secondary btn-cancel-inline">Cancel</button>
+      <button type="submit" class="btn btn-primary">Save</button>
+    </div>
+  </form>
+`;
+
+    span.parentElement.insertAdjacentElement('afterend', editor);
+    feather.replace();
+    activeInlineEditor = editor;
+
+    // Botón cancelar
+    editor.querySelector('.btn-cancel-inline').addEventListener('click', () => {
+      editor.remove();
+      activeInlineEditor = null;
+    });
+  });
+});
+
+document.addEventListener('click', function (e) {
+  if (
+    activeInlineEditor &&
+    !activeInlineEditor.contains(e.target) &&
+    !e.target.classList.contains('editable-task')
+  ) {
+    activeInlineEditor.remove();
+    activeInlineEditor = null;
   }
 });
 
