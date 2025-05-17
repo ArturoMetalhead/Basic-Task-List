@@ -7,9 +7,12 @@
 
 {% block content %}
 
+<div class="text-center mt-5 mb-4">
+  <h1 class="display-4 fw-bold" style="color: #0d6efd;">Task List</h1>
+  <p class="text-muted">Keep track of your tasks easily</p>
+</div>
 
-
-<div class="d-flex justify-content-center">
+<div class="d-flex justify-content-center mt-5">
   <div style="width: 100%; max-width: 960px;">
     
     <form id="taskForm" method="post" action="{% url 'add_task' %}" class="task-box mb-4">
