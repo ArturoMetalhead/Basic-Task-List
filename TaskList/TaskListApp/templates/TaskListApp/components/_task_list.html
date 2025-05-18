@@ -4,7 +4,7 @@
 <ul class="list-group">
   {% for task in tasks %}
     <li class="list-group-item d-flex align-items-center">
-      <form method="post" action="{% url 'delete_task' task.id %}" onsubmit="return confirm('Delete this task?');" class="me-2">
+      <form method="post" action="{% url 'delete_task' task.id %}"  class="me-2">
         {% csrf_token %}
         <input type="checkbox" onchange="this.form.submit()" />
       </form>
