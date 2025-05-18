@@ -4,269 +4,28 @@
 
 {% block title %}TaskList{% endblock %}
 
-
 {% block content %}
-
+<!-- HEADER SECTION -->
 <div class="text-center mt-5 mb-4">
   <h1 class="display-4 fw-bold" style="color: #0d6efd;">Task List</h1>
   <p class="text-muted">Keep track of your tasks easily</p>
 </div>
 
+<!-- MAIN CONTENT SECTION -->
 <div class="d-flex justify-content-center mt-5">
   <div style="width: 100%; max-width: 960px;">
     
-    <form id="taskForm" method="post" action="{% url 'add_task' %}" class="task-box mb-4">
-      {% csrf_token %}
+    {% include "TaskListApp/components/_task_form.html" %}
 
-      <!-- Input con ícono -->
-      <div class="input-wrapper">
-        <span id="plusToggle" class="plus-icon">
-          <i data-feather="plus-square"></i>
-        </span>
-        <input type="text" name="title" id="taskInput"
-               class="form-control task-input ps-5"
-               placeholder="Type to add new task">
-        <input type="hidden" name="task_id" id="taskIdInput" value="">
-      </div>
-
-      <!-- Botones debajo -->
-      <div id="leftButtons" class="task-buttons fade-buttons d-flex justify-content-between align-items-center flex-nowrap gap-2">
-        <div id="extraButtons" class="d-flex gap-2 overflow-auto">
-          <!-- Botones extra -->
-          <button type="button" class="task-button" disabled><i data-feather="maximize-2"></i> Open</button>
-          <button type="button" class="task-button" disabled><i data-feather="calendar"></i> Today</button>
-          <button type="button" class="task-button" disabled><i data-feather="lock"></i> Public</button>
-          <button type="button" class="task-button" disabled><i data-feather="sun"></i> Highlight</button>
-          <button type="button" class="task-button" disabled><i data-feather="circle"></i> Estimation</button>
-        </div>
-        <div class="btn-group-right d-flex gap-2">
-          <button type="button" class="task-button btn-cancel" id="cancelBtn">Cancel</button>
-          <button type="submit" class="task-button btn-ok" id="okBtn">Ok</button>
-
-           <!-- botón unificado-->
-           <button type="button" id="mobileActionBtn" class="task-button d-none">
-            <i data-feather="x"></i>
-          </button>
-
-        </div>
-      </div>
-    </form>
-
-    <!-- Lista de tareas -->
-    <ul class="list-group">
-      {% for task in tasks %}
-        <li class="list-group-item d-flex align-items-center">
-          <form method="post" action="{% url 'delete_task' task.id %}" onsubmit="return confirm('Delete this task?');" class="me-2">
-            {% csrf_token %}
-            <input type="checkbox" onchange="this.form.submit()" />
-          </form>
-          <span class="editable-task" data-id="{{ task.id }}">{{ task.title|highlight_tags }}</span>
-        </li>
-      {% empty %}
-        <li class="list-group-item text-center">No tasks yet.</li>
-      {% endfor %}
-    </ul>
-
+    {% include "TaskListApp/components/_task_list.html" %}
   </div>
 </div>
-
-
-<!-------------------SCRIPTS------------------>
-
-<script>
-  const input = document.getElementById('taskInput');
-  const okBtn = document.getElementById('okBtn');
-  const cancelBtn = document.getElementById('cancelBtn');
-  const form = document.getElementById('taskForm');
-  const leftButtonsContainer = document.getElementById('leftButtons');
-  const leftButtons = document.querySelectorAll('#extraButtons button');
-  const plusToggle = document.getElementById('plusToggle');
-  const mobileActionBtn = document.getElementById('mobileActionBtn');
-  
-  let activeInlineEditor = null;
-  
-  function updateButtons() {
-    const isEmpty = input.value.trim() === "";
-    const isMobile = window.innerWidth < 1230;
-  
-    if (isMobile) {
-      mobileActionBtn.classList.remove('d-none');
-      cancelBtn.classList.add('d-none');
-      okBtn.classList.add('d-none');
-      mobileActionBtn.innerHTML = `<i data-feather="${isEmpty ? 'x' : 'plus'}"></i>`;
-      feather.replace();
-    } else {
-      mobileActionBtn.classList.add('d-none');
-      cancelBtn.classList.remove('d-none');
-      okBtn.classList.remove('d-none');
-      okBtn.textContent = isEmpty ? "Ok" : "Add";
-      cancelBtn.disabled = false;
-    }
-  
-    leftButtons.forEach(btn => btn.disabled = isEmpty);
-  }
-  
-  input.addEventListener('input', updateButtons);
-  window.addEventListener('resize', updateButtons);
-  input.addEventListener('focus', () => leftButtonsContainer.classList.add('show'));
-  input.addEventListener('blur', () => setTimeout(() => {
-    if (input.value.trim() === "") {
-      leftButtonsContainer.classList.remove('show');
-    }
-  }, 100));
-  
-  cancelBtn.addEventListener('click', () => {
-    input.value = "";
-    okBtn.textContent = "Ok";
-    cancelBtn.disabled = false;
-    leftButtons.forEach(btn => btn.disabled = true);
-    leftButtonsContainer.classList.remove('show');
-  });
-  
-  form.addEventListener('submit', (e) => {
-    if (input.value.trim() === "") e.preventDefault();
-  });
-  
-  plusToggle.addEventListener('click', () => {
-    if (!leftButtonsContainer.classList.contains('show')) {
-      leftButtonsContainer.classList.add('show');
-      input.focus();
-    }
-  });
-  
-  mobileActionBtn.addEventListener('click', () => {
-    const isEmpty = input.value.trim() === "";
-    if (isEmpty) {
-      input.value = "";
-      leftButtonsContainer.classList.remove('show');
-      updateButtons();
-    } else {
-      form.submit();
-    }
-  });
-
-  function attachEditListener(span) {
-  span.addEventListener('click', () => {
-    if (activeInlineEditor) {
-      activeInlineEditor.replaceWith(activeInlineEditor.originalSpan);
-      activeInlineEditor = null;
-    }
-
-    const taskText = span.textContent.trim();
-    const taskId = span.getAttribute('data-id');
-
-    const editor = document.createElement('div');
-    editor.classList.add('task-box', 'inline-editor', 'mt-2');
-
-    const csrfToken = document.getElementById('csrf-token').innerHTML;
-
-    editor.innerHTML = `
-      <form method="post" action="{% url 'add_task' %}" class="inline-edit-form">
-        ${csrfToken}
-        <input type="hidden" name="task_id" value="${taskId}">
-        <div class="input-wrapper">
-          <input type="text" name="title" class="form-control task-input ps-5" value="${taskText}" autofocus>
-        </div>
-        <div class="task-buttons d-flex justify-content-between align-items-center flex-nowrap gap-2 mt-2">
-          <div class="d-flex gap-2 overflow-auto extraButtons">
-            <button type="button" class="task-button" disabled><i data-feather="maximize-2"></i> Open</button>
-            <button type="button" class="task-button" disabled><i data-feather="calendar"></i> Today</button>
-            <button type="button" class="task-button" disabled><i data-feather="lock"></i> Public</button>
-            <button type="button" class="task-button" disabled><i data-feather="sun"></i> Highlight</button>
-            <button type="button" class="task-button" disabled><i data-feather="circle"></i> Estimation</button>
-          </div>
-          <div class="btn-group-right d-flex gap-2">
-            <button type="button" class="task-button btn-cancel-inline">Cancel</button>
-            <button type="submit" class="task-button btn-ok-inline">Save</button>
-            <button type="button" class="task-button d-none btn-mobile-inline"><i data-feather="save"></i></button>
-          </div>
-        </div>
-      </form>
-    `;
-
-    feather.replace();
-
-    span.replaceWith(editor);
-    editor.originalSpan = span;
-    activeInlineEditor = editor;
-
-    const input = editor.querySelector('input[name="title"]');
-    setTimeout(() => {
-      input.focus();
-      input.setSelectionRange(input.value.length, input.value.length);
-    }, 0);
-
-    setTimeout(() => {
-    feather.replace();
-  }, 0);
-
-    //const input = editor.querySelector('input[name="title"]');
-    const cancelBtn = editor.querySelector('.btn-cancel-inline');
-    const okBtn = editor.querySelector('.btn-ok-inline');
-    const mobileBtn = editor.querySelector('.btn-mobile-inline');
-    const extras = editor.querySelectorAll('.extraButtons button');
-
-    function updateInlineButtons() {
-      const isEmpty = input.value.trim() === "";
-      const isMobile = window.innerWidth < 1230;
-
-      if (isMobile) {
-        cancelBtn.classList.add('d-none');
-        okBtn.classList.add('d-none');
-        mobileBtn.classList.remove('d-none');
-        mobileBtn.innerHTML = `<i data-feather="${isEmpty ? 'x' : 'save'}"></i>`;
-        feather.replace();
-      } else {
-        cancelBtn.classList.remove('d-none');
-        okBtn.classList.remove('d-none');
-        mobileBtn.classList.add('d-none');
-      }
-
-      extras.forEach(btn => btn.disabled = isEmpty);
-    }
-
-    input.addEventListener('input', updateInlineButtons);
-    window.addEventListener('resize', updateInlineButtons);
-    updateInlineButtons();
-
-    cancelBtn.addEventListener('click', () => {
-      editor.replaceWith(span);
-      attachEditListener(span);
-      activeInlineEditor = null;
-    });
-
-    mobileBtn.addEventListener('click', () => {
-      const isEmpty = input.value.trim() === "";
-      if (isEmpty) {
-        editor.replaceWith(span);
-        attachEditListener(span);
-        activeInlineEditor = null;
-      } else {
-        editor.querySelector('form').submit();
-      }
-    });
-  });
-}
-
-document.querySelectorAll('.editable-task').forEach(attachEditListener);
-
-
-document.addEventListener('click', (e) => {
-  if (
-    activeInlineEditor &&
-    !activeInlineEditor.contains(e.target) &&
-    !e.target.classList.contains('editable-task')
-  ) {
-    const originalSpan = activeInlineEditor.originalSpan;
-    activeInlineEditor.replaceWith(originalSpan);
-    attachEditListener(originalSpan);
-    activeInlineEditor = null;
-  }
-});
-
-</script>
-  
-
+<!-- Hidden csrf Token for JavaScript use -->
 <span id="csrf-token" style="display: none;">{% csrf_token %}</span>
+{% endblock %}
 
+{% block scripts %}
+<!-- JavaScript for handling task form and task editing -->
+<script src="{% static 'js/task-form.js' %}"></script>
+<script src="{% static 'js/task-editor.js' %}"></script>
 {% endblock %}

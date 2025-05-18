@@ -1,0 +1,37 @@
+{% load static %}
+
+<!-- Task Input Form -->
+<form id="taskForm" method="post" action="{% url 'add_task' %}" class="task-box mb-4">
+  {% csrf_token %}
+
+  <!-- Inputs -->
+  <div class="input-wrapper">
+    <span id="plusToggle" class="plus-icon">
+      <i data-feather="plus-square"></i>
+    </span>
+    <input type="text" name="title" id="taskInput"
+           class="form-control task-input ps-5"
+           placeholder="Type to add new task">
+    <input type="hidden" name="task_id" id="taskIdInput" value="">
+  </div>
+
+  <!-- Action Buttons -->
+  <div id="leftButtons" class="task-buttons fade-buttons d-flex justify-content-between align-items-center flex-nowrap gap-2">
+    <div id="extraButtons" class="d-flex gap-2 overflow-auto">
+      <!-- Extra Action Buttons -->
+      <button type="button" class="task-button" disabled><i data-feather="maximize-2"></i> Open</button>
+      <button type="button" class="task-button" disabled><i data-feather="calendar"></i> Today</button>
+      <button type="button" class="task-button" disabled><i data-feather="lock"></i> Public</button>
+      <button type="button" class="task-button" disabled><i data-feather="sun"></i> Highlight</button>
+      <button type="button" class="task-button" disabled><i data-feather="circle"></i> Estimation</button>
+    </div>
+    <div class="btn-group-right d-flex gap-2">
+      <button type="button" class="task-button btn-cancel" id="cancelBtn">Cancel</button>
+      <button type="submit" class="task-button btn-ok" id="okBtn">Ok</button>
+      <!-- Mobile Action Button -->
+      <button type="button" id="mobileActionBtn" class="task-button d-none">
+        <i data-feather="x"></i>
+      </button>
+    </div>
+  </div>
+</form>
