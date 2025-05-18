@@ -15,10 +15,10 @@ def add_task(request):
             task = get_object_or_404(Task, id=task_id)
 
             if title == '':
-                # Si está vacío, eliminar
+                # if void, delete
                 task.delete()
             else:
-                # Si tiene contenido, actualizar
+                # else, update
                 task.title = title
                 task.save()
         else:
