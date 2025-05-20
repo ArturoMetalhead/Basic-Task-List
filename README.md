@@ -20,7 +20,7 @@ To run this project, you need to have the following installed on your machine:
 - coverage
 - webdriver-manager
 
-(Note: You can install the requirements using pip install -r requirements.txt in the TaskList folder)
+(Note: You can install the requirements using ```pip install requirements.txt``` in the TaskList folder)
 
 ## Running the Project
 
@@ -30,38 +30,39 @@ To run this project, you need to have the following installed on your machine:
 
 3. Run the server
 
-(Bash into TaskList folder) python manage.py runserver
+(Open a terminal and `cd` into the TaskList folder) 
+
+```bash
+python manage.py runserver
+```
 
 4. Run the tests
+ 
 
-(Bash into TaskList folder) 
-
-'''bash
+```bash
 python manage.py test
-'''
+```
 
 5. Run the coverage report
 
-(Bash into TaskList folder) 
 
-'''bash
+```bash
 coverage run manage.py test
 coverage report
-'''
+```
 
 ### Coverage Report
 
-Name                                         Stmts   Miss  Cover
-----------------------------------------------------------------
-TaskListApp\__init__.py                          0      0   100%
-TaskListApp\admin.py                             1      0   100%
-TaskListApp\apps.py                              4      0   100%
-TaskListApp\migrations\0001_initial.py           5      0   100%
-TaskListApp\migrations\__init__.py               0      0   100%
-TaskListApp\models.py                           11      1    91%
-manage.py                                       11      2    82%
-----------------------------------------------------------------
-TOTAL                                          266      4    98%
+| File                                       | Stmts | Miss | Cover |
+|-------------------------------------------|-------|------|-------|
+| TaskListApp\__init__.py                   | 0     | 0    | 100%  |
+| TaskListApp\admin.py                      | 1     | 0    | 100%  |
+| TaskListApp\apps.py                       | 4     | 0    | 100%  |
+| TaskListApp\migrations\0001_initial.py    | 5     | 0    | 100%  |
+| TaskListApp\migrations\__init__.py        | 0     | 0    | 100%  |
+| TaskListApp\models.py                     | 11    | 1    | 91%   |
+| manage.py                                 | 11    | 2    | 82%   |
+| **TOTAL**                                 | 266   | 4    | **98%** |
 
 ## Docker
 
@@ -69,15 +70,15 @@ This project includes a Dockerfile to facilitate containerization. To build and 
 
 1. Build the Docker image:
 
-'''bash
+```bash
 docker-compose build
-'''
+```
 
 2. Run the Docker container:
 
-'''bash
+```bash
 docker-compose up
-'''
+```
 
 ## Testing Strategy
 
