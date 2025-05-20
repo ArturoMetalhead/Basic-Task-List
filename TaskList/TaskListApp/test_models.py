@@ -32,4 +32,4 @@ class TaskModelTest(TestCase):
         self.assertIsNotNone(self.task.created_at)  # Ensure created_at remains unchanged
         self.assertIsNotNone(self.task.updated_at)  # Ensure updated_at is set
         self.assertGreater(self.task.updated_at, self.task.created_at)  # Ensure updated_at is after created_at
-        self.assertEqual(self.task.updated_at, self.task.updated_at)  # Ensure updated_at is consistentIt looks like you're working on a Django test case for a `Task` model.
+        self.assertEqual(self.task.updated_at, self.task.updated_at)  # Ensure updated_at is consistent.
